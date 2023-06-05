@@ -153,6 +153,9 @@ PORT = 8000
 
 class OTAHandler(BaseHTTPRequestHandler):
 
+    # status: device requests every file separately
+    # TODO: reduce interactions to one updatream and one downstream if possible
+
     def do_GET(self):
         print("Got query for: {}".format(self.path))
 
