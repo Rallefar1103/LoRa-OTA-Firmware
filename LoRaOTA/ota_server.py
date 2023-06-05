@@ -164,6 +164,29 @@ def webhook1():
         print("sent")
         print (res.raise_for_status())
         return 'success', 200
+    
+        if path == "/manifest.json":
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+
+                # If query specified a version generate a diff from that version
+                # otherwise return a manifest of all files
+                if "current_ver" in query_components:
+                    current_ver = query_components["current_ver"][0]
+                else:
+                    # This assumes there is no version lower than 0
+                    current_ver = '0'
+
+                # Send manifest
+                print("Generating a manifest from version: {}".format(current_ver))
+                manifest = generate_manifest(current_ver, host)
+                j = json.dumps(manifest,
+                            sort_keys=True,
+                            indent=4,
+                            separators=(',', ': '))
+                self.wfile.write(j.encode())
+    
 
 
 @app.route('/downlinks', methods=['POST'])
@@ -270,7 +293,7 @@ def get_all_paths(path, ignore=[]):
 # Parameters
 #    left - The original directory
 #    right - The directory with updates
-#    ignore - A list o file name which to ignore
+#    ignore - A list of file name which to ignore
 def get_diff_list(left, right, ignore=['.DS_Store', 'pymakr.conf']):
     left_paths = get_all_paths(left, ignore=ignore)
     right_paths = get_all_paths(right, ignore=ignore)
