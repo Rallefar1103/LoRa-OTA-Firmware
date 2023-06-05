@@ -120,7 +120,16 @@
 # "host" header along with your HTTP get request e.g:
 # GET /manifest.json?current_ver=1.0.0 HTTP/1.0\r\nHost: 192.168.1.144:8000\r\n\r\n
 
-from flask import Flask, request
+import os
+import socket
+import json
+import hashlib
+import filecmp
+import re
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
+from distutils.version import LooseVersion
 
 class TTN_APP:
   def __init__(self, app_id, dev_id, app_api_key):
@@ -137,78 +146,7 @@ class TTN_APP:
         os.makedirs(self.app_id)
 
 ttn_apps = {}
-ttn_apps['my-application'] = TTN_APP(app_id="my-application",dev_id="eui-70b3d5499a2b29c2", app_api_key="")
-
-@app.route('/', methods=['GET'])
-def hello():
-    data = {
-        "msg": "applications",
-        "data": [ttn_app_x.app_url for ttn_app_x in ttn_apps.values()]
-    }
-    return jsonify(data), 200
-
-
-@app.route('/join-accept', methods=['POST'])
-def webhook3():
-    print("hello")
-    if(request.method == 'POST'):
-        print(request.json)
-    return 'success', 200
-
-@app.route('/uplinks', methods=['POST'])
-def webhook1():
-    if(request.method == 'POST'):
-        
-        res = requests.post(url, json=data, headers=headers)
-        print (res.status_code)
-        print("sent")
-        print (res.raise_for_status())
-        return 'success', 200
-    
-        if path == "/manifest.json":
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-
-                # If query specified a version generate a diff from that version
-                # otherwise return a manifest of all files
-                if "current_ver" in query_components:
-                    current_ver = query_components["current_ver"][0]
-                else:
-                    # This assumes there is no version lower than 0
-                    current_ver = '0'
-
-                # Send manifest
-                print("Generating a manifest from version: {}".format(current_ver))
-                manifest = generate_manifest(current_ver, host)
-                j = json.dumps(manifest,
-                            sort_keys=True,
-                            indent=4,
-                            separators=(',', ': '))
-                self.wfile.write(j.encode())
-    
-
-
-@app.route('/downlinks', methods=['POST'])
-def webhook2():
-    if(request.method == 'POST'):
-        print(request.json)
-        return 'success', 200
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
-
-# TODO integrate server from OTA into webhook format
-import os
-import socket
-import json
-import hashlib
-import filecmp
-import re
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
-from distutils.version import LooseVersion
+ttn_apps['my-application'] = TTN_APP(app_id="my-application",dev_id="eui-70b3d5499a2b29c2", app_api_key="NNSXS.TJ6S4Q5HYGCF6VZUXMHSV7BN3XMMKFX5DT2PXSQ.L4KO5CXIKCIDMTAPWFPV4HJSAIEVY2RAU6H6IPGEPKSJGFADNM5Q")
 
 PORT = 8000
 
