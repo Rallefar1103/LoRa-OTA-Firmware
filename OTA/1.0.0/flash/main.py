@@ -15,6 +15,7 @@ from OTA import WiFiOTA
 from time import sleep
 import pycom
 import binascii
+import ubinascii
 
 from config import WIFI_SSID, WIFI_PW, SERVER_IP
 
@@ -35,8 +36,9 @@ w.deinit()
 # Initialize LoRa in LORAWAN mode.
 lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
 
-app_eui = binascii.unhexlify('ENTER_ME')
-app_key = binascii.unhexlify('ENTER_ME')
+app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
+app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
+dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
 
 # join a network using OTAA (Over the Air Activation)
 lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
