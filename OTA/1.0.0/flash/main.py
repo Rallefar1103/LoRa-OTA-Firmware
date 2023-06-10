@@ -17,17 +17,10 @@ import pycom
 import binascii
 import ubinascii
 
-from config import WIFI_SSID, WIFI_PW, SERVER_IP
-
 # Turn on GREEN LED
 pycom.heartbeat(False)
 pycom.rgbled(0xff00)
 
-# Setup OTA
-ota = WiFiOTA(WIFI_SSID,
-              WIFI_PW,
-              SERVER_IP,  # Update server address
-              8000)  # Update server port
 
 # Turn off WiFi to save power
 w = WLAN()
