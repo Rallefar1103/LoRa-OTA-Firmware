@@ -18,6 +18,8 @@ import gc
 import pycom
 import os
 import machine
+import time
+from network import LoRa, WLAN
 
 # Try to get version number
 try:
@@ -257,10 +259,35 @@ class WiFiOTA(OTA):
         elif hash:
             return hash_val
 
-class LoraOTA(OTA):
-    def __init__(self):
-        pass
+# TODO switch implementation form WiFiOTA to LoRaOTA
+class LoRaOTA(OTA):
+    def __init__(self, app_eui, app_key, dev_eui):
+        self.app_eui = ubinascii.unhexlify(app_eui)
+        self.app_key = ubinascii.unhexlify(app_key)
+        self.dev_eui = ubinascii.unhexlify(dev_eui)
 
+    def connect(self, lora=None):
+        if lora is None:
+            self.lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
+        else:
+            self.lora = lora
+
+        # Uncomment for US915 / AU915 & Pygate
+        for i in range(0, 8):
+            self.lora.remove_channel(i)
+        for i in range(16, 65):
+            self.lora.remove_channel(i)
+        for i in range(66, 72):
+            self.lora.remove_channel(i)
+
+        if not self.lora.has_joined():
+            self.lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
+            while not lora.has_joined():
+                time.sleep(2.5)
+                print('Not yet joined...')
+        else:
+            # Already connected to LoRa
+            pass
 
     def _http_get(self, path, host):
         req_fmt = 'GET /{} HTTP/1.0\r\nHost: {}\r\n\r\n'
