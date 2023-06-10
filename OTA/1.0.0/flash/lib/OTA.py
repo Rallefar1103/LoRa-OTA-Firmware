@@ -18,6 +18,8 @@ import gc
 import pycom
 import os
 import machine
+import time
+from network import LoRa, WLAN
 
 # Try to get version number
 try:
@@ -259,26 +261,32 @@ class WiFiOTA(OTA):
 
 # TODO switch implementation form WiFiOTA to LoRaOTA
 class LoRaOTA(OTA):
-    def __init__(self, ssid, password, ip, port):
-        self.SSID = ssid
-        self.password = password
-        self.ip = ip
-        self.port = port
+    def __init__(self, app_eui, app_key, dev_eui):
+        self.app_eui = ubinascii.unhexlify(app_eui)
+        self.app_key = ubinascii.unhexlify(app_key)
+        self.dev_eui = ubinascii.unhexlify(dev_eui)
 
-    def connect(self):
-        self.wlan = network.WLAN(mode=network.WLAN.STA)
-        if not self.wlan.isconnected() or self.wlan.ssid() != self.SSID:
-            for net in self.wlan.scan():
-                if net.ssid == self.SSID:
-                    self.wlan.connect(self.SSID, auth=(network.WLAN.WPA2,
-                                                       self.password))
-                    while not self.wlan.isconnected():
-                        machine.idle()  # save power while waiting
-                    break
-            else:
-                raise Exception("Cannot find network '{}'".format(SSID))
+    def connect(self, lora=None):
+        if lora is None:
+            self.lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
         else:
-            # Already connected to the correct WiFi
+            self.lora = lora
+
+        # Uncomment for US915 / AU915 & Pygate
+        for i in range(0, 8):
+            self.lora.remove_channel(i)
+        for i in range(16, 65):
+            self.lora.remove_channel(i)
+        for i in range(66, 72):
+            self.lora.remove_channel(i)
+
+        if not self.lora.has_joined():
+            self.lora.join(activation=LoRa.OTAA, auth=(app_eui, app_key), timeout=0)
+            while not lora.has_joined():
+                time.sleep(2.5)
+                print('Not yet joined...')
+        else:
+            # Already connected to LoRa
             pass
 
     def _http_get(self, path, host):
