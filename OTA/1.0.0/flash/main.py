@@ -27,7 +27,7 @@ w = WLAN()
 w.deinit()
 
 # Initialize LoRa in LORAWAN mode.
-lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.EU868)
+lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.US915)
 
 app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
 app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
@@ -58,7 +58,7 @@ s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 print("Socket Created")
 
 # set the LoRaWAN data rate
-s.setsockopt(socket.SOL_LORA, socket.SO_DR, 5)
+s.setsockopt(socket.SOL_LORA, socket.SO_DR, 3)
 print("Set Socket Data Rate")
 
 # make the socket blocking
