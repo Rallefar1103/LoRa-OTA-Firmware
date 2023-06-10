@@ -62,8 +62,6 @@ while True:
     # get any data received (if any...)
     data = s.recv(64)
 
-    data = bytes([0x01, 0x02, 0x03])
-    
     # Some sort of OTA trigger
     if data == bytes([0x01, 0x02, 0x03]):
         print("Performing OTA")
