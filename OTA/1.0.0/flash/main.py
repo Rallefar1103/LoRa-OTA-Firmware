@@ -22,16 +22,18 @@ pycom.heartbeat(False)
 pycom.rgbled(0xff00)
 
 
-# Turn off WiFi to save power
-w = WLAN()
-w.deinit()
-
 # Initialize LoRa in LORAWAN mode.
 lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.US915)
 
-app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
-app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
+# Tan's Tenant
+# app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
+# app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
+# dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
+# Mark's Tenant
+app_eui = ubinascii.unhexlify('0102030405060708')
+app_key = ubinascii.unhexlify('66C384977A646B8BF820D5EF83487397')
 dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
+
 
 # Uncomment for US915 / AU915 & Pygate
 for i in range(0, 8):
@@ -73,7 +75,7 @@ while True:
     # make the socket non-blocking
     # (because if there's no data received it will block forever...)
     s.setblocking(False)
-    s.settimeout(3.0)
+    # ms.settimeout(60.0)
 
     try:
         rx_pkt = s.recv(64)
