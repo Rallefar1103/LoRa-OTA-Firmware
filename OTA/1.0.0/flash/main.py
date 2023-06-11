@@ -65,8 +65,66 @@ print("Set Socket Data Rate")
 
 # make the socket blocking
 # (waits for the data to be sent and for the 2 receive windows to expire)
-s.setblocking(True)
+s.setblocking(False)
 print("Set Socket Blocking")
+
+# creat a object to hold firmware files
+data = []
+
+while True:
+    # Create a loop to take the segments of the file and store them in the data object
+    rx_pkt = s.recv(64)
+    print("Received data: {}".format(rx_pkt))
+    # Check if the data received is the start of the OTA
+    if rx_pkt == bytes([0x01, 0x02, 0x03]):
+        print("Performing OTA")
+        # Get the number of segments
+
+        while True:
+            num_seg = s.recv(64)
+            print("Total Length: {}".format(num_seg))
+            # Wait for the number of segments to be received
+            if num_seg != b'':
+                # Convert the byte received to an integer
+                num_seg = int.from_bytes(num_seg, "big")
+                print("Total Length: {}".format(num_seg))
+
+                # using the number of segments, loop through and get the data
+                while len(data) < num_seg+1:
+                    data_pkt = s.recv(64)
+                    # only append the data if the data_pkt is not empty
+                    if data_pkt != b'':
+                        print("Received data: {}".format(rx_pkt))
+                        data.append(data_pkt)
+                        print("Data len is : {}", len(data))
+                    sleep(1)
+            sleep(1)
+    sleep(1)
+
+
+
+
+# while True:
+#     # get any data received (if any...)
+#     rx_pkt = s.recv(64)
+#     print("Received data: {}".format(rx_pkt))
+#     if rx_pkt == bytes([0x01, 0x02, 0x03]):
+#         print("Performing OTA")
+#         # Perform OTA
+#         ota.connect()
+#         ota.update()
+#     else:
+#         data.append(rx_pkt)
+#         print("Data: {}".format(data))
+#
+#     sleep(5)
+
+
+
+
+
+
+
 
 while True:
     # send some data
