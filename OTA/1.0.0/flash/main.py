@@ -102,7 +102,10 @@ while True:
             sleep(1)
     sleep(1)
 
-
+# Write 2d binary array data to a file
+with open('/flash/ota.bin', 'wb') as f:
+    for i in range(len(data)):
+        f.write(data[i])
 
 
 # while True:
@@ -127,31 +130,31 @@ while True:
 
 
 
-while True:
-    # send some data
-    s.send(bytes([0x04, 0x05, 0x06]))
-
-    # make the socket non-blocking
-    # (because if there's no data received it will block forever...)
-    s.setblocking(False)
-    # ms.settimeout(60.0)
-
-    try:
-        rx_pkt = s.recv(64)
-        print("Received data: {}".format(rx_pkt))
-    except socket.timeout:
-        print("No data received")
-
-
-    # get any data received (if any...)
-    data = s.recv(64)
-
-    # Some sort of OTA trigger
-    if data == bytes([0x01, 0x02, 0x03]):
-        print("Performing OTA")
-        # Perform OTA
-        ota.connect()
-        ota.update()
-
-    sleep(5)
+# while True:
+#     # send some data
+#     s.send(bytes([0x04, 0x05, 0x06]))
+#
+#     # make the socket non-blocking
+#     # (because if there's no data received it will block forever...)
+#     s.setblocking(False)
+#     # ms.settimeout(60.0)
+#
+#     try:
+#         rx_pkt = s.recv(64)
+#         print("Received data: {}".format(rx_pkt))
+#     except socket.timeout:
+#         print("No data received")
+#
+#
+#     # get any data received (if any...)
+#     data = s.recv(64)
+#
+#     # Some sort of OTA trigger
+#     if data == bytes([0x01, 0x02, 0x03]):
+#         print("Performing OTA")
+#         # Perform OTA
+#         ota.connect()
+#         ota.update()
+#
+#     sleep(5)
 
