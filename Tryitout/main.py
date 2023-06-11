@@ -26,12 +26,16 @@ def main():
     lora = LoraNet(LORA_FREQUENCY, LORA_NODE_DR, LORA_REGION, LORA_DEVICE_CLASS, LORA_ACTIVATION, LORA_CRED)
     lora.connect()
 
+    print("LoRa fire up")
     ota = LoraOTA(lora)
+    print("LoRa fired up!")
 
     while True:
         rx = lora.receive(256)
         if rx:
             print('Received user message: {}'.format(rx))
+        else:
+            print("No message received")
 
         utime.sleep(2)
 

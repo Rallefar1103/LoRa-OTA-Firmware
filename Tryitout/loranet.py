@@ -41,6 +41,7 @@ class LoraNet:
 
     def receive_callback(self, lora):
         events = lora.events()
+        print("RECEIVE_CALLBACK TRIGGERED!!! {}".format(LoRa.RX_PACKET_EVENT))
         if events & LoRa.RX_PACKET_EVENT:
             rx, port = self.sock.recvfrom(256)
             if rx:
@@ -100,6 +101,7 @@ class LoraNet:
         while not self.lora.has_joined():
             time.sleep(2.5)
             print('Not joined yet...')
+        print("Joined!")
 
     def has_joined(self):
         return self.lora.has_joined()
@@ -131,9 +133,10 @@ class LoraNet:
 
     def receive(self, bufsize):
         with self.q_lock:
+            print("Self Message Queue: {}".format(self._msg_queue))
             if len(self._msg_queue) > 0:
                 return self._msg_queue.pop(0)
-        return ''
+        return 'Empty String'
 
     def get_dev_eui(self):
         return binascii.hexlify(self.lora.mac()).decode('ascii')
