@@ -278,4 +278,6 @@ class OTAHandler:
         payload = '{"reference": "abcd1234" ,"fPort":1,"data": "' + b64Data.decode() + '"}'
         topic = "application/" + str(config.LORASERVER_APP_ID) + "/device/" + dev_eui + "/command/down"
         print('Publish to {} : {}'.format(topic, payload))
-        self.p_client.publish(topic=topic,payload=payload)
+        print('Publish to {} : {}'.format(topic, payload))
+
+        # self.p_client.publish(topic=topic,payload=payload)
