@@ -262,10 +262,24 @@ class WiFiOTA(OTA):
 
 # TODO switch implementation form WiFiOTA to LoRaOTA
 class LoRaOTA(OTA):
-    def __init__(self, app_eui, app_key, dev_eui):
-        self.app_eui = ubinascii.unhexlify(app_eui)
-        self.app_key = ubinascii.unhexlify(app_key)
-        self.dev_eui = ubinascii.unhexlify(dev_eui)
+    def __init__(self, frequency, dr, region, device_class=LoRa.CLASS_C, activation = LoRa.OTAA, auth = None):
+        self.frequency = frequency
+        self.dr = dr
+        self.region = region
+        self.device_class = device_class
+        self.activation = activation
+        self.auth = auth
+        self.sock = None
+        self._exit = False
+        self.s_lock = _thread.allocate_lock()
+        self.lora = LoRa(mode=LoRa.LORAWAN, region = self.region, device_class = self.device_class)
+
+        self._msg_queue = []
+        self.q_lock = _thread.allocate_lock()
+        self._process_ota_msg = None
+
+    def init(self, process_msg_callback):
+        self._process_ota_msg = process_msg_callback
 
     def connect(self, lora=None):
         if lora is None:
