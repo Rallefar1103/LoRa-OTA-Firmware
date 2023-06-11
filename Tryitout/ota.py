@@ -18,6 +18,7 @@ import utime
 import uos
 import machine
 import json
+# 244F54412C312C312E31372E302C2A
 
 class LoraOTA:
 
@@ -69,11 +70,9 @@ class LoraOTA:
         self.device_mainfest = None
 
         self._exit = False
-        _thread.start_new_thread(self._thread_proc, ())
-
-        self.inactivity_timeout = 120
         self.wdt = Watchdog()
-
+        self._thread_proc()
+        self.inactivity_timeout = 120
         self.lora.init(self.process_message)
 
     def stop(self):
@@ -173,7 +172,7 @@ class LoraOTA:
                 version = fh.read().rstrip("\r\n\s")
         else:
             self._write_version_info(version)
-
+        
         print("Version: {}", version)
 
         return version
