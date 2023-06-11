@@ -165,6 +165,8 @@ class LoraOTA:
 
         self.lora.send(msg)
         print("Lora OTA: Request for info sent")
+        ###
+
 
     def get_current_version(self):
         version = '0.0.0'
