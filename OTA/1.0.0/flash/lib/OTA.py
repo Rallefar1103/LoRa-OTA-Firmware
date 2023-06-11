@@ -19,6 +19,7 @@ import pycom
 import os
 import machine
 import time
+import ubinascii
 from network import LoRa, WLAN
 
 # Try to get version number
@@ -288,6 +289,49 @@ class LoRaOTA(OTA):
         else:
             # Already connected to LoRa
             pass
+    
+
+    def has_joined(self):
+        return self.lora.has_joined()
+
+    def _create_socket(self):
+
+        # create a LoRa socket
+        self.sock = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+
+        # set the LoRaWAN data rate
+        self.sock.setsockopt(socket.SOL_LORA, socket.SO_DR, self.dr)
+
+        # make the socket non blocking
+        self.sock.setblocking(False)
+
+        time.sleep(2)
+
+    def send(self, packet):
+        with self.s_lock:
+            self.sock.send(packet)
+
+    def receive(self, bufsize):
+        with self.q_lock:
+            if len(self._msg_queue) > 0:
+                return self._msg_queue.pop(0)
+        return ''
+
+    def get_dev_eui(self):
+        return binascii.hexlify(self.lora.mac()).decode('ascii')
+    
+    def receive_callback(self, lora):
+        events = lora.events()
+        if events & LoRa.RX_PACKET_EVENT:
+            rx, port = self.sock.recvfrom(256)
+            if rx:
+                if '$OTA' in rx:
+                    print("OTA msg received: {}".format(rx))
+                    self._process_ota_msg(rx.decode())
+                else:
+                    self.q_lock.acquire()
+                    self._msg_queue.append(rx)
+                    self.q_lock.release()
 
     def _http_get(self, path, host):
         req_fmt = 'GET /{} HTTP/1.0\r\nHost: {}\r\n\r\n'
@@ -299,9 +343,7 @@ class LoRaOTA(OTA):
 
         # Connect to server
         print("Requesting: {}".format(req))
-        s = socket.socket(socket.AF_INET,
-                          socket.SOCK_STREAM,
-                          socket.IPPROTO_TCP)
+        s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
         s.connect((self.ip, self.port))
 
         # Request File
