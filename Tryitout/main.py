@@ -15,9 +15,10 @@ import machine
 import utime
 
 def main():
-    LORA_FREQUENCY = 868100000
-    LORA_NODE_DR = 5
-    LORA_REGION = LoRa.EU868
+    # LORA_FREQUENCY = 868100000
+    LORA_FREQUENCY = 910000000
+    LORA_NODE_DR = 3 # DR has to be 3 for USA
+    LORA_REGION = LoRa.US915
     LORA_DEVICE_CLASS = LoRa.CLASS_C
     LORA_ACTIVATION = LoRa.OTAA
     LORA_CRED = ('240ac4fffe0bf998', '948c87eff87f04508f64661220f71e3f', '5e6795a5c9abba017d05a2ffef6ba858')

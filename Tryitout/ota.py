@@ -8,7 +8,7 @@
 # available at https://www.pycom.io/opensource/licensing
 #
 
-import diff_match_patch as dmp_module
+# import diff_match_patch as dmp_module
 from watchdog import Watchdog
 from machine import RTC
 import ubinascii
@@ -372,25 +372,25 @@ class LoraOTA:
 
         return True
 
-    def apply_patches(self):
-        for key, value in self.patch_list.items():
-            self.dmp = dmp_module.diff_match_patch()
-            self.patch_list = self.dmp.patch_fromText(value)
+    # def apply_patches(self):
+    #     for key, value in self.patch_list.items():
+    #         self.dmp = dmp_module.diff_match_patch()
+    #         self.patch_list = self.dmp.patch_fromText(value)
 
-            to_patch = ''
-            print('Updating file: {}'.format(key))
-            if self.update_type == self.DIFF_UPDATE and \
-               self.file_exists('/flash/' + key):
-                to_patch = self._read_file(key)
+    #         to_patch = ''
+    #         print('Updating file: {}'.format(key))
+    #         if self.update_type == self.DIFF_UPDATE and \
+    #            self.file_exists('/flash/' + key):
+    #             to_patch = self._read_file(key)
 
-            patched_text, success = self.dmp.patch_apply(self.patch_list, to_patch)
-            if False in success:
-                return False
+    #         patched_text, success = self.dmp.patch_apply(self.patch_list, to_patch)
+    #         if False in success:
+    #             return False
 
-            if not self._write_to_file(key, patched_text):
-                return False
+    #         if not self._write_to_file(key, patched_text):
+    #             return False
 
-        return True
+    #     return True
 
     @staticmethod
     def find_backups():
@@ -439,8 +439,8 @@ class LoraOTA:
         if self.checksum_failure:
             print('Failed checksum: Discarding update ...')
             self.reset_update_params()
-        elif not self.apply_patches():
-            LoraOTA.revert()
+        # elif not self.apply_patches():
+        #     LoraOTA.revert()
         else:
             print('Update Success: Restarting .... ')
             self._write_version_info(self.update_version)

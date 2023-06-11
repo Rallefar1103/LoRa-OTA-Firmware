@@ -11,6 +11,7 @@
 from network import LoRa
 import socket
 import binascii
+import ubinascii
 import struct
 import time
 import _thread
@@ -60,12 +61,19 @@ class LoraNet:
         self.lora.callback(trigger=LoRa.RX_PACKET_EVENT, handler=self.receive_callback)
 
         # set the 3 default channels to the same frequency
-        self.lora.add_channel(0, frequency=self.frequency, dr_min=0, dr_max=5)
-        self.lora.add_channel(1, frequency=self.frequency, dr_min=0, dr_max=5)
-        self.lora.add_channel(2, frequency=self.frequency, dr_min=0, dr_max=5)
+        # self.lora.add_channel(0, frequency=self.frequency, dr_min=0, dr_max=5)
+        # self.lora.add_channel(1, frequency=self.frequency, dr_min=0, dr_max=5)
+        # self.lora.add_channel(2, frequency=self.frequency, dr_min=0, dr_max=5)
 
         # remove all the non-default channels
-        for i in range(3, 16):
+        # for i in range(3, 16):
+        #     self.lora.remove_channel(i)
+        # Uncomment for US915 / AU915 & Pygate
+        for i in range(0, 8):
+            self.lora.remove_channel(i)
+        for i in range(16, 65):
+            self.lora.remove_channel(i)
+        for i in range(66, 72):
             self.lora.remove_channel(i)
 
         # authenticate with abp or ota
@@ -80,12 +88,15 @@ class LoraNet:
     def _authenticate_otaa(self, auth_params):
 
         # create an OTAA authentication params
-        self.dev_eui = binascii.unhexlify(auth_params[0])
-        self.app_eui = binascii.unhexlify(auth_params[1])
-        self.app_key = binascii.unhexlify(auth_params[2])
+        # self.dev_eui = binascii.unhexlify(auth_params[0])
+        # self.app_eui = binascii.unhexlify(auth_params[1])
+        # self.app_key = binascii.unhexlify(auth_params[2])
+        self.app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
+        self.app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
+        self.dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
 
-        self.lora.join(activation=LoRa.OTAA, auth=(self.dev_eui, self.app_eui, self.app_key), timeout=0, dr=self.dr)
-
+        #self.lora.join(activation=LoRa.OTAA, auth=(self.dev_eui, self.app_eui, self.app_key), timeout=0, dr=self.dr)
+        self.lora.join(activation=LoRa.OTAA, auth=(self.dev_eui, self.app_eui, self.app_key), timeout=0)
         while not self.lora.has_joined():
             time.sleep(2.5)
             print('Not joined yet...')
