@@ -99,7 +99,10 @@ while True:
             sleep(1)
     sleep(1)
 
-
+# Write 2d binary array data to a file
+with open('/flash/ota.bin', 'wb') as f:
+    for i in range(len(data)):
+        f.write(data[i])
 
 
 # while True:
