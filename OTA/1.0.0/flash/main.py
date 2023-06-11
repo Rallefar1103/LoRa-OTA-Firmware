@@ -72,7 +72,8 @@ print("Set Socket Blocking")
 # creat a object to hold firmware files
 data = []
 
-while True:
+flag = True
+while flag:
     # Create a loop to take the segments of the file and store them in the data object
     rx_pkt = s.recv(64)
     print("Received data: {}".format(rx_pkt))
@@ -81,7 +82,7 @@ while True:
         print("Performing OTA")
         # Get the number of segments
 
-        while True:
+        while flag:
             num_seg = s.recv(64)
             print("Total Length: {}".format(num_seg))
             # Wait for the number of segments to be received
@@ -99,6 +100,7 @@ while True:
                         data.append(data_pkt)
                         print("Data len is : {}", len(data))
                     sleep(1)
+                flag = False
             sleep(1)
     sleep(1)
 
