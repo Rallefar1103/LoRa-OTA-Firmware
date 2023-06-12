@@ -56,6 +56,9 @@ def webhook1():
         # if we get the OTA trigger
         if(decoded_uplink_data == '\x01\x02\x03'):
 
+            # clear any blobs in the buffer
+            file_chunks.clear()
+
             # prepare the blobs
             file_chunks.append(get_blobs.get_blobs_from_file('thisisatest.txt'))
             file_chunks.insert(0, len(file_chunks))
