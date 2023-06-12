@@ -1,7 +1,7 @@
 # splits a file into chunks of 64 bytes
 def get_blobs_from_file(filename):
     
-    chunksize = 64
+    chunksize = 40
     list_of_chunks = []
     
     with open(filename, "rb") as f:
