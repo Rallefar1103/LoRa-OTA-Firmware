@@ -81,6 +81,7 @@ while flag:
     if rx_pkt == bytes([0x01, 0x02, 0x03]):
         print("Performing OTA")
         # Get the number of segments
+        s.send(bytes([0x03, 0x02, 0x01]))
 
         while flag:
             num_seg = s.recv(64)
@@ -90,6 +91,7 @@ while flag:
                 # Convert the byte received to an integer
                 num_seg = int.from_bytes(num_seg, "big")
                 print("Total Length: {}".format(num_seg))
+                s.send(bytes([0x03, 0x02, 0x01]))
 
                 # using the number of segments, loop through and get the data
                 while len(data) < num_seg+1:
@@ -99,6 +101,7 @@ while flag:
                         print("Received data: {}".format(rx_pkt))
                         data.append(data_pkt)
                         print("Data len is : {}", len(data))
+                        s.send(bytes([0x03, 0x02, 0x01]))
                     sleep(1)
                 flag = False
             sleep(1)
