@@ -1,9 +1,8 @@
 from flask import Flask, request 
 import requests
 import json
-import os
-import urllib
 import base64
+import get_blobs
 
 
 app = Flask(__name__)
@@ -31,6 +30,7 @@ data = {
 #     }]
 #   }
 
+file_chunks = []
 
 @app.route('/')
 def hello():
@@ -47,7 +47,34 @@ def webhook3():
 
 @app.route('/uplinks', methods=['POST'])
 def webhook1():
+    global file_chunks
+
     if(request.method == 'POST'):
+
+        decoded_uplink_data = decode_frm_payload(request.json["uplink_message"]["frm_payload"])
+
+        # if we get the OTA trigger
+        if(decoded_uplink_data == '\x01\x02\x03'):
+            json, file_chunks = start_ota("thisisatest.txt")
+            res = requests.post(url, json=json, headers=headers)
+            log("uplinks", request.json)
+            return 'success', 200
+
+        if(decoded_uplink_data == '\x03\x02\x01'):
+            json = start_ota("thisisatest.txt")
+            
+            if(len(file_chunks)):
+                blob = file_chunks.pop(0)
+                json = insert_payload_in_json(blob)
+
+                res = requests.post(url, json=json, headers=headers)
+                log("uplinks", request.json)
+                return 'success', 200
+            else:
+                res = requests.post(url, json=insert_payload_in_json('brontasaurus!'), headers=headers)
+                log("uplinks", request.json)
+                return 'success', 200
+
         res = requests.post(url, json=insert_payload_in_json(b'\x11'), headers=headers)
         
         log("uplinks", request.json)
@@ -79,6 +106,19 @@ def insert_payload_in_json(data):
         }]
     }
     return payload
+
+def decode_frm_payload(data):
+    decoded_data = base64.b64decode(data).decode('utf-8')
+    log("decoded_data", f"{data} : {decoded_data}" )
+    return decoded_data
+
+def start_ota(filename):
+    blobs = get_blobs.get_blobs_from_file(filename)
+    messages = len(blobs)
+    json = insert_payload_in_json(messages)
+    return (json, blobs)
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
