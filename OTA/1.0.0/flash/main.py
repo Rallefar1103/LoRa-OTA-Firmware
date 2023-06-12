@@ -22,16 +22,19 @@ pycom.heartbeat(False)
 pycom.rgbled(0xff00)
 
 
-# Turn off WiFi to save power
-w = WLAN()
-w.deinit()
-
 # Initialize LoRa in LORAWAN mode.
 lora = LoRa(mode=LoRa.LORAWAN, region=LoRa.US915)
 
+# Tan's Tenant
 app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
 app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
 dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
+
+# Mark's Tenant
+# app_eui = ubinascii.unhexlify('0102030405060708')
+# app_key = ubinascii.unhexlify('66C384977A646B8BF820D5EF83487397')
+# dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
+
 
 # Uncomment for US915 / AU915 & Pygate
 for i in range(0, 8):
@@ -69,7 +72,8 @@ print("Set Socket Blocking")
 # creat a object to hold firmware files
 data = []
 
-while True:
+flag = True
+while flag:
     # Create a loop to take the segments of the file and store them in the data object
     rx_pkt = s.recv(64)
     print("Received data: {}".format(rx_pkt))
@@ -77,8 +81,9 @@ while True:
     if rx_pkt == bytes([0x01, 0x02, 0x03]):
         print("Performing OTA")
         # Get the number of segments
+        s.send(bytes([0x03, 0x02, 0x01]))
 
-        while True:
+        while flag:
             num_seg = s.recv(64)
             print("Total Length: {}".format(num_seg))
             # Wait for the number of segments to be received
@@ -86,6 +91,7 @@ while True:
                 # Convert the byte received to an integer
                 num_seg = int.from_bytes(num_seg, "big")
                 print("Total Length: {}".format(num_seg))
+                s.send(bytes([0x03, 0x02, 0x01]))
 
                 # using the number of segments, loop through and get the data
                 while len(data) < num_seg+1:
@@ -95,11 +101,16 @@ while True:
                         print("Received data: {}".format(rx_pkt))
                         data.append(data_pkt)
                         print("Data len is : {}", len(data))
+                        s.send(bytes([0x03, 0x02, 0x01]))
                     sleep(1)
+                flag = False
             sleep(1)
     sleep(1)
 
-
+# Write 2d binary array data to a file
+with open('/flash/ota.bin', 'wb') as f:
+    for i in range(len(data)):
+        f.write(data[i])
 
 
 # while True:
@@ -124,31 +135,31 @@ while True:
 
 
 
-while True:
-    # send some data
-    s.send(bytes([0x04, 0x05, 0x06]))
-
-    # make the socket non-blocking
-    # (because if there's no data received it will block forever...)
-    s.setblocking(False)
-    s.settimeout(3.0)
-
-    try:
-        rx_pkt = s.recv(64)
-        print("Received data: {}".format(rx_pkt))
-    except socket.timeout:
-        print("No data received")
-
-
-    # get any data received (if any...)
-    data = s.recv(64)
-
-    # Some sort of OTA trigger
-    if data == bytes([0x01, 0x02, 0x03]):
-        print("Performing OTA")
-        # Perform OTA
-        ota.connect()
-        ota.update()
-
-    sleep(5)
+# while True:
+#     # send some data
+#     s.send(bytes([0x04, 0x05, 0x06]))
+#
+#     # make the socket non-blocking
+#     # (because if there's no data received it will block forever...)
+#     s.setblocking(False)
+#     # ms.settimeout(60.0)
+#
+#     try:
+#         rx_pkt = s.recv(64)
+#         print("Received data: {}".format(rx_pkt))
+#     except socket.timeout:
+#         print("No data received")
+#
+#
+#     # get any data received (if any...)
+#     data = s.recv(64)
+#
+#     # Some sort of OTA trigger
+#     if data == bytes([0x01, 0x02, 0x03]):
+#         print("Performing OTA")
+#         # Perform OTA
+#         ota.connect()
+#         ota.update()
+#
+#     sleep(5)
 

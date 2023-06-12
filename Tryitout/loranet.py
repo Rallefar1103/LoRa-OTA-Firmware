@@ -40,6 +40,7 @@ class LoraNet:
         self._process_ota_msg = process_msg_callback
 
     def receive_callback(self, lora):
+        print("Im in receive_callback")
         events = lora.events()
         print("RECEIVE_CALLBACK TRIGGERED!!! {}".format(LoRa.RX_PACKET_EVENT))
         if events & LoRa.RX_PACKET_EVENT:
@@ -53,6 +54,14 @@ class LoraNet:
                     self._msg_queue.append(rx)
                     self.q_lock.release()
 
+    def transmit_callback(self, lora):
+        print("Im in transmit_callback")
+        events = lora.events()
+        print("TRANSMIT_CALLBACK TRIGGERED!!! {}".format(LoRa.TX_PACKET_EVENT))
+        if events & LoRa.TX_PACKET_EVENT:
+            print('Packet sent')
+            self.s_lock.release()
+
     def connect(self):
         if self.activation != LoRa.OTAA and self.activation != LoRa.ABP:
             raise ValueError("Invalid Lora activation method")
@@ -60,6 +69,7 @@ class LoraNet:
             raise ValueError("Invalid authentication parameters")
 
         self.lora.callback(trigger=LoRa.RX_PACKET_EVENT, handler=self.receive_callback)
+        self.lora.callback(trigger=LoRa.TX_PACKET_EVENT, handler=self.transmit_callback)
 
         # set the 3 default channels to the same frequency
         # self.lora.add_channel(0, frequency=self.frequency, dr_min=0, dr_max=5)
@@ -89,9 +99,6 @@ class LoraNet:
     def _authenticate_otaa(self, auth_params):
 
         # create an OTAA authentication params
-        # self.dev_eui = binascii.unhexlify(auth_params[0])
-        # self.app_eui = binascii.unhexlify(auth_params[1])
-        # self.app_key = binascii.unhexlify(auth_params[2])
         self.app_eui = ubinascii.unhexlify('58A0CBFFFE803F9C')
         self.app_key = ubinascii.unhexlify('E82511CC86A1FF6F8AEC6238920225DA')
         self.dev_eui = ubinascii.unhexlify('70B3D5499A2B29C2')
