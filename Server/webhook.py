@@ -55,14 +55,21 @@ def webhook1():
 
         # if we get the OTA trigger
         if(decoded_uplink_data == '\x01\x02\x03'):
-            json, file_chunks = start_ota("thisisatest.txt")
+
+            # prepare the blobs
+            file_chunks.append(get_blobs.get_blobs_from_file('thisisatest.txt'))
+            file_chunks.insert(0, len(file_chunks))
+
+            # send the ack
+            json = insert_payload_in_json(b'\x01\x02\x03')
             res = requests.post(url, json=json, headers=headers)
             log("uplinks", request.json)
             return 'success', 200
 
+        # if we're in data
         if(decoded_uplink_data == '\x03\x02\x01'):
-            json = start_ota("thisisatest.txt")
             
+            # send the next blob
             if(len(file_chunks)):
                 blob = file_chunks.pop(0)
                 json = insert_payload_in_json(blob)
@@ -111,14 +118,6 @@ def decode_frm_payload(data):
     decoded_data = base64.b64decode(data).decode('utf-8')
     log("decoded_data", f"{data} : {decoded_data}" )
     return decoded_data
-
-def start_ota(filename):
-    blobs = get_blobs.get_blobs_from_file(filename)
-    messages = len(blobs)
-    json = insert_payload_in_json(messages)
-    return (json, blobs)
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
