@@ -33,6 +33,7 @@ replace_data = {
 
 file_chunks = []
 last_sent = None
+blob = None
 
 @app.route('/')
 def hello():
