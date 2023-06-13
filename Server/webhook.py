@@ -68,6 +68,7 @@ def webhook3():
 def webhook1():
     global file_chunks
     global last_sent
+    global blob
 
     if(request.method == 'POST'):
 
@@ -87,8 +88,9 @@ def webhook1():
             
             # send the next blob
             if(len(file_chunks)):
-                blob = file_chunks.pop(0)
                 last_sent = blob
+                blob = file_chunks.pop(0)
+                
                 json = insert_payload_in_json(blob)
 
                 res = requests.post(push_url, json=json, headers=headers)
