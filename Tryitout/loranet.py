@@ -131,7 +131,8 @@ class LoraNet:
 
         # make the socket non blocking
         self.sock.setblocking(False)
-
+        print("In create socket {}".format(self.lora.RX_PACKET_EVENT))
+        print("Create Socket, Self Message Queue: {}".format(self._msg_queue))
         time.sleep(2)
 
     def send(self, packet):
