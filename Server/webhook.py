@@ -3,7 +3,7 @@ import requests
 import json
 import base64
 import get_blobs
-
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -59,6 +59,7 @@ def webhook3():
     if(request.method == 'POST'):
         print(request.json)
         log("join-accept", request.json)
+        log("Time", datetime.now())
 
         res = requests.post(replace_url, headers=headers)
         return 'success', 200
@@ -82,6 +83,8 @@ def webhook1():
             json = insert_payload_in_json(last_sent)
             res = requests.post(push_url, json=json, headers=headers)
             log("uplinks", request.json)
+            log("Time", datetime.now())
+
             return 'success', 200
 
         # if we're in data
@@ -96,15 +99,18 @@ def webhook1():
 
                 res = requests.post(push_url, json=json, headers=headers)
                 log("uplinks", request.json)
+                log("Time", datetime.now())
                 return 'success', 200
             else:
                 res = requests.post(push_url, json=insert_payload_in_json('brontasaurus!'), headers=headers)
                 log("uplinks", request.json)
+                log("Time", datetime.now())
                 return 'success', 200
 
         res = requests.post(push_url, json=insert_payload_in_json(b'\x11'), headers=headers)
         
         log("uplinks", request.json)
+        log("Time", datetime.now())
         return 'success', 200
 
 
