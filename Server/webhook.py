@@ -3,7 +3,7 @@ import requests
 import json
 import base64
 import get_blobs
-
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -33,6 +33,7 @@ replace_data = {
 
 file_chunks = []
 last_sent = None
+blob = None
 
 @app.route('/')
 def hello():
@@ -47,7 +48,7 @@ def webhook3():
     file_chunks.clear()
 
     # prepare the blobs for OTA
-    file_chunks.extend(get_blobs.get_blobs_from_file('thisisatest.txt'))
+    file_chunks.extend(get_blobs.get_blobs_from_file('first100kb_ota.bin'))
     length = len(file_chunks)
     file_chunks.insert(0, length.to_bytes((length.bit_length() + 7 )// 8, 'big'))
     print(file_chunks)
@@ -58,6 +59,8 @@ def webhook3():
     if(request.method == 'POST'):
         print(request.json)
         log("join-accept", request.json)
+        log("Time", "NEW TEST RUNNING!!!!!!")
+        log("Time", datetime.now().isoformat())
 
         res = requests.post(replace_url, headers=headers)
         return 'success', 200
@@ -68,6 +71,7 @@ def webhook3():
 def webhook1():
     global file_chunks
     global last_sent
+    global blob
 
     if(request.method == 'POST'):
 
@@ -80,6 +84,10 @@ def webhook1():
             json = insert_payload_in_json(last_sent)
             res = requests.post(push_url, json=json, headers=headers)
             log("uplinks", request.json)
+            log("Time", "RETRANSMISSION OCCURRED!")
+            log("Time", datetime.now().isoformat())
+            
+
             return 'success', 200
 
         # if we're in data
@@ -87,21 +95,26 @@ def webhook1():
             
             # send the next blob
             if(len(file_chunks)):
+                
                 blob = file_chunks.pop(0)
                 last_sent = blob
                 json = insert_payload_in_json(blob)
 
                 res = requests.post(push_url, json=json, headers=headers)
                 log("uplinks", request.json)
+                log("Time", datetime.now().isoformat())
                 return 'success', 200
             else:
-                res = requests.post(push_url, json=insert_payload_in_json('brontasaurus!'), headers=headers)
+                # res = requests.post(push_url, json=insert_payload_in_json('brontasaurus!'), headers=headers)
+                log("Time", "RETRANSMISSION OF LENGTH (INCORRECT LENGTH)")
                 log("uplinks", request.json)
+                log("Time",datetime.now().isoformat())
                 return 'success', 200
 
         res = requests.post(push_url, json=insert_payload_in_json(b'\x11'), headers=headers)
         
         log("uplinks", request.json)
+        log("Time", datetime.now().isoformat())
         return 'success', 200
 
 
